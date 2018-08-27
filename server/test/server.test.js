@@ -4,10 +4,19 @@ const request = require('supertest');
 const {app} = require('./../server');
 const {Todo} = require('./../models/todo');
 
+const todos = [{
+  text: 'First test todo'
+}, {
+  text: 'Second test todo'
+}];
+
 // Run the function before each individual test case.
 beforeEach((done) => {
   // Wipe out all Todo in the database.
-  Todo.remove({}).then(() => done())
+  Todo.remove({}).then(() => {
+    // Chain of async functions.
+    return Todo.insertMany(todos);
+  }).then(() => done());
 });
 
 describe('Post /todos', () => {
@@ -26,7 +35,7 @@ describe('Post /todos', () => {
           return done(err);
         }
 
-        Todo.find().then((todos) => {
+        Todo.find({text}).then((todos) => {
           expect(todos.length).toBe(1);
           expect(todos[0].text).toBe(text);
           done();
@@ -45,7 +54,7 @@ describe('Post /todos', () => {
           return done(err);
         }
         Todo.find().then((todos) => {
-          expect(todos.length).toBe(0);
+          expect(todos.length).toBe(2);
           // done() should be call at the end of the async method to ensure
           // mocha make the right judgement.
           done();
@@ -53,3 +62,15 @@ describe('Post /todos', () => {
       });
   });
 })
+
+describe('GET /todos', () => {
+  it('should get all todos', (done) => {
+    request(app)
+      .get('/todos')
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.todos.length).toBe(2);
+      })
+      .end(done)
+  })
+});
