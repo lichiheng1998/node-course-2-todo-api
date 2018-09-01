@@ -46,9 +46,33 @@ UserSchema.methods.generateAuthToken = function () {
 
   user.tokens = user.tokens.concat([{access, token}]);
 
-   return user.save().then(() => {
+  // Save the token into the database and return the token promise.
+  return user.save().then(() => {
     // return in promise, another promise will be returned.
     return token;
+  });
+};
+
+UserSchema.statics.findByToken = function (token) {
+  // The module;
+  var User = this;
+  var decoded;
+
+  try {
+    decoded = jwt.verify(token, 'abc123');
+  } catch (e) {
+    // return new Promise((resolve, reject) => {
+    //   reject();
+    // });
+    return Promise.reject();
+  }
+
+  return User.findOne({
+    '_id': decoded._id,
+    // When querying the nested Object, the name of the field should be wrapped
+    // by the single quote.
+    'tokens.token': token,
+    'tokens.access': 'auth'
   });
 };
 
