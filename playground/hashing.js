@@ -1,16 +1,31 @@
 const {SHA256} = require('crypto-js');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 
-var data = {
-  id: 10
-};
+var password = '123abc';
 
-// Create a token which contains the data and the hashing of the salted data.
-var token = jwt.sign(data, '123abc');
-console.log(token);
+bcrypt.genSalt(10, (err, salt) => {
+  bcrypt.hash(password, salt, (err, hash) => {
+    console.log(hash);
+  })
+});
 
-var decoded = jwt.verify(token, '123abc');
-console.log('decoded', decoded);
+// The string contains the salt and the hash. The salt changes everytime.
+var hashedPassword = '$2a$10$KjgepKWjwWMh1ox6ls9lsOUDC7yvj1bqXEQqXjNih69KVshNl0f5y';
+
+bcrypt.compare(password, hashedPassword, (err, res) => {
+  console.log(res);
+})
+// var data = {
+//   id: 10
+// };
+//
+// // Create a token which contains the data and the hashing of the salted data.
+// var token = jwt.sign(data, '123abc');
+// console.log(token);
+//
+// var decoded = jwt.verify(token, '123abc');
+// console.log('decoded', decoded);
 
 // var message = 'I am user number 3';
 // // One way algorithm
