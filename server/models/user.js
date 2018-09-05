@@ -58,10 +58,10 @@ UserSchema.methods.removeToken = function (token) {
   var user = this;
 
   return user.update({
-    // Pull out the field from the database.
+    // Removes all array elements that match a specified query.
     $pull: {
       tokens: {
-        token: token
+        token
       }
     }
   });
